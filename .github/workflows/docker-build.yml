@@ -8,6 +8,7 @@ on:
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
+  EVCC_VERSION: v0.124.0 # Definiert die stabile evcc-Version passend zum Braiins-Code
 
 jobs:
   check-and-build:
@@ -17,24 +18,15 @@ jobs:
       packages: write
 
     steps:
-      # 1. Holt das offizielle evcc-Repository als Basis
+      # 1. Holt das offizielle evcc-Repository mit der passenden Version
       - name: Checkout official evcc repository
         uses: actions/checkout@v4
         with:
           repository: 'evcc-io/evcc'
+          ref: ${{ env.EVCC_VERSION }}
           fetch-depth: 1
 
-      # 2. Ermittelt die neueste evcc-Version
-      - name: Fetch latest evcc upstream release tag
-        id: evcc_tag
-        run: |
-          TAG=$(curl -s https://github.com | jq -r .tag_name)
-          echo "latest_tag=$TAG" >> $GITHUB_OUTPUT
-          echo "Nutze offizielle evcc Version: $TAG"
-          # Wechselt den lokalen Code auf die exakte Release-Version
-          git checkout tags/$TAG
-
-      # 3. Lädt die Braiins-Dateien vollautomatisch aus dem Quell-Repository herunter
+      # 2. Lädt die Braiins-Dateien vollautomatisch herunter
       - name: Download Braiins custom driver files
         run: |
           mkdir -p charger templates/definition/charger
@@ -42,7 +34,7 @@ jobs:
           curl -sSL https://githubusercontent.com -o templates/definition/charger/braiins.yaml
           echo "Braiins-Erweiterung erfolgreich in den Quellcode injiziert."
 
-      # 4. Login in die GitHub Container Registry
+      # 3. Login in die GitHub Container Registry
       - name: Log in to the Container registry
         uses: docker/login-action@v3
         with:
@@ -50,11 +42,11 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      # 5. Bereitet die Build-Umgebung vor
+      # 4. Bereitet die Build-Umgebung vor
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      # 6. Baut das Image mit dem injizierten Code und dem originalen Dockerfile von evcc
+      # 5. Baut das Image mit dem originalen Dockerfile von evcc
       - name: Build and push Docker image
         uses: docker/build-push-action@v6
         with:
@@ -63,6 +55,6 @@ jobs:
           push: true
           tags: |
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.evcc_tag.outputs.latest_tag }}
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.EVCC_VERSION }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
