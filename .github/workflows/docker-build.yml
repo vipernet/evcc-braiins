@@ -28,7 +28,7 @@ jobs:
       - name: Fetch latest evcc upstream release tag
         id: evcc_tag
         run: |
-          TAG=$(curl -s https://github.com | jq -r .tag_name)
+          TAG=$(curl -s https://github.com/evcc-io/evcc | jq -r .tag_name)
           echo "latest_tag=$TAG" >> $GITHUB_OUTPUT
           echo "Nutze offizielle evcc Version: $TAG"
           # Wechselt den lokalen Code auf die exakte Release-Version
