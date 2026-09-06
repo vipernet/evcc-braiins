@@ -30,8 +30,8 @@ jobs:
       - name: Download Braiins custom driver files
         run: |
           mkdir -p charger templates/definition/charger
-          curl -sSL https://githubusercontent.com -o charger/braiins.go
-          curl -sSL https://githubusercontent.com -o templates/definition/charger/braiins.yaml
+          curl --retry 5 --retry-delay 3 -sSL https://githubusercontent.com -o charger/braiins.go
+          curl --retry 5 --retry-delay 3 -sSL https://githubusercontent.com -o templates/definition/charger/braiins.yaml
           echo "Braiins-Erweiterung erfolgreich in den Quellcode injiziert."
 
       # 3. Login in die GitHub Container Registry
