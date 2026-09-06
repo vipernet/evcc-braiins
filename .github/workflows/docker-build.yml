@@ -8,7 +8,7 @@ on:
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
-  EVCC_VERSION: v0.124.0 # Definiert die stabile evcc-Version passend zum Braiins-Code
+  EVCC_VERSION: 0.124.0 # Definiert die stabile evcc-Version passend zum Braiins-Code
 
 jobs:
   check-and-build:
